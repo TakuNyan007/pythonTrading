@@ -20,6 +20,19 @@ class Bitmex:
         self.bitmex.apiKey = apiKey
         self.bitmex.secret = secret
 
+    def handle(self, func, *args):
+        while True:
+            try:
+                return func(*args)
+            except requests.exceptions.RequestException as e:
+                print("request error:", e)
+                print("try again after 5 seconds.")
+                time.sleep(5)
+            except ccxt.BaseError as e:
+                print("ccxt error: ", e)
+                print("try again after 5 seconds.")
+                time.sleep(5)
+
     def get_price(self, sec):
         res = requests.get(
             base_url + '/ohlc', params={"periods": sec})
@@ -32,11 +45,11 @@ class Bitmex:
                 ohlc.Ohlc(data[0], data[1], data[2], data[3], data[4]))
         return ohlclist
 
-    def get_last_price(self, sec):
+    def get_price_by_idx(self, sec, idx=-2):
         res = requests.get(
             base_url + '/ohlc', params={"periods": sec})
         res = res.json()
-        data = res["result"][str(sec)][-2]  # 確定している最新の足
+        data = res["result"][str(sec)][idx]
         return ohlc.Ohlc(data[0], data[1], data[2], data[3], data[4])
 
     def create_limit_order(self, side, price, amount):
@@ -64,10 +77,11 @@ class Bitmex:
         for p in positions:
             if p["symbol"] == "XBTUSD":
                 return p["currentQty"]
+        return None
 
     def close_position(self, qty):
         side = BUY if qty < 0 else SELL
-        self.create_market_order(side, abs(qty))
+        return self.create_market_order(side, abs(qty))
 
     def create_market_order(self, side, amount):
         order = self.bitmex.create_order(

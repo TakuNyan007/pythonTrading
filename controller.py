@@ -2,17 +2,20 @@ import bitmex
 import configparser
 from strategy import sanpei
 from strategy.models import status
+from notification import line
 from datetime import datetime
 import calendar
 import time
 
-# config.iniファイルからapiKeyとapiSecretを取得
+# config.iniファイルから設定情報を取得
 config_ini = configparser.ConfigParser()
 config_ini.read("config.ini", encoding="utf-8")
 apiKey = config_ini.get("bitmex", "apiKey")
 apiSecret = config_ini.get("bitmex", "apiSecret")
+line_token = config_ini.get("LINE", "token")
 
 client = bitmex.Bitmex(apiKey, apiSecret)
+notifier = line.LineNotifier(line_token)
 
 
 def cancel_all_orders(orders, interval):
@@ -60,6 +63,7 @@ def runBot(strategy, intervalSec=10):
         time.sleep(intervalSec)
 
 
-runBot(sanpei.Sanpei())
+# runBot(sanpei.Sanpei())
 # print(client.handle(client.get_price_by_idx, 60))
 # print(client.handle(client.cancel_all_orders))
+notifier.notify("ゴリラ")

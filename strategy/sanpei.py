@@ -32,22 +32,22 @@ class Sanpei:
     def entrySignal(self, data, last_data):
         if not self.check_candle(data):
             self.signal = 0
-            return "NO_SIGNAL"
+            return ""
 
         ascend_param = self.check_ascend(data, last_data)
         if ascend_param == 0:
             self.signal = 0
-            return "NO_SIGNAL"
+            return ""
 
         self.signal += ascend_param
 
         if self.signal == 3:
             print("3本連続陽線です。買いシグナル点灯しました。")
-            return "BUY"
+            return "buy"
 
         if self.signal == -3:
             print("3本連続陰線です。売りシグナル点灯しました。")
-            return "SELL"
+            return "sell"
 
     def closeSignal(self, data, last_data):
         if not abs(self.signal) != 3:

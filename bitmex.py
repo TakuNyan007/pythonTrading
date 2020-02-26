@@ -9,6 +9,9 @@ from strategy.models import ohlc
 base_url = 'https://api.cryptowat.ch/markets/bitmex/btcusd-perpetual-futures'
 BTC_USD = "BTC/USD"
 LIMIT = "limit"
+MARKET = "market"
+BUY = "buy"
+SELL = "sell"
 
 
 class Bitmex:
@@ -33,7 +36,7 @@ class Bitmex:
         res = requests.get(
             base_url + '/ohlc', params={"periods": sec})
         res = res.json()
-        data = res["result"][str(sec)]  # 確定している最新の足
+        data = res["result"][str(sec)][-2]  # 確定している最新の足
         return ohlc.Ohlc(data[0], data[1], data[2], data[3], data[4])
 
     def create_limit_order(self, side, price, amount):
@@ -56,8 +59,21 @@ class Bitmex:
             r = self.bitmex.cancel_order(symbol=BTC_USD, id=o["id"])
             pprint(r)
 
-    def closePosition(self):
-        pass
+    def get_position(self):
+        positions = self.bitmex.private_get_position()
+        for p in positions:
+            if p["symbol"] == "XBTUSD":
+                return p["currentQty"]
 
-    def create_order(self, side):
-        pass
+    def close_position(self, qty):
+        side = BUY if qty < 0 else SELL
+        self.create_market_order(side, abs(qty))
+
+    def create_market_order(self, side, amount):
+        order = self.bitmex.create_order(
+            symbol=BTC_USD,
+            type=MARKET,
+            side=side,
+            amount=amount
+        )
+        return order

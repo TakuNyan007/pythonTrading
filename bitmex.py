@@ -14,6 +14,9 @@ BUY = "buy"
 SELL = "sell"
 
 
+# @with_error_handleデコレータをつけると例外処理付きで実行できます
+# デコレータとは？
+# https://qiita.com/mtb_beta/items/d257519b018b8cd0cc2e
 def with_error_handle(func):
     def wrapper(*args, **kwargs):
         while True:

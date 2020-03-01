@@ -11,7 +11,9 @@ class Ohlc:
     close: float
 
     def print_price(self):
-        close_time_str = datetime.fromtimestamp(
-            self.close_time).strftime('%Y/%m/%d %H:%M')
-        print(close_time_str, "open:", self.open, "high:",
+        print(self.close_time_str, " open:", self.open, "high:",
               self.high, "low:", self.low, "close:", self.close)
+
+    def close_time_str(self):
+        return datetime.fromtimestamp(
+            self.close_time).strftime('%Y/%m/%d %H:%M')

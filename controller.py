@@ -30,10 +30,10 @@ def cancel_all_orders(orders, interval):
         print("注文が" + (interval * 5) + "秒以内に約定しなかったため、キャンセルしました。")
 
 
-def runBot(strategy, intervalSec=10):
+def runBot(strategy, intervalSec=10, lot=1, period=60):
     l_ohlc = None
     while True:
-        ohlc = client.get_price_by_idx(60)  # 確定している最新の足を取得
+        ohlc = client.get_price_by_idx(period)  # 確定している最新の足を取得
         # 初回ループ時のみl_ohlcにohlcをセット
         if l_ohlc == None:
             ohlc.print_price()
@@ -52,19 +52,25 @@ def runBot(strategy, intervalSec=10):
                 signal = strategy.closeSignal(ohlc, l_ohlc)
                 if signal:
                     client.close_position(qty)
+                    msg = "[{time}] close position price:{price} amount:{lot}".format(
+                        time=ohlc.close_time_str, price=ohlc.close, lot=lot)
+                    print(msg)
+                    notifier.notify(msg)
             else:
                 side = strategy.entrySignal(ohlc, l_ohlc)
                 if side != "":
-                    client.create_limit_order(side, ohlc.close, 10)
-                    print(10 + "USD: " + side)
+                    client.create_limit_order(side, ohlc.close, lot)
+                    msg = "[{time}] entry:{side} price:{price} amount:{lot}".format(
+                        time=ohlc.close_time_str, side=side, price=ohlc.close, lot=lot)
+                    print(msg)
+                    notifier.notify(msg)
             l_ohlc = ohlc
 
         time.sleep(intervalSec)
 
 
-# runBot(sanpei.Sanpei())
+runBot(sanpei.Sanpei(), intervalSec=10, lot=1, period=60)
 # print(client.handle(client.get_price_by_idx, 60))
 # print(client.handle(client.cancel_all_orders))
 # notifier.notify("ゴリラ")
-
-print(client.get_price(60))
+# print(client.get_price(60))

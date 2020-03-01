@@ -12,12 +12,14 @@ class BotLogger():
             self.notifier = None
 
         # ログの設定
-        logging.basicConfig(format="[%(asctime)s] %(message)s")
         self.logger = logging.getLogger(__name__)
         handlerSh = logging.StreamHandler()
         handlerFile = logging.FileHandler(filename=log_path, encoding="utf-8")
         handlerSh.setLevel(logging.INFO)
+        handlerSh.setFormatter(logging.Formatter("[%(asctime)s] %(message)s"))
         handlerFile.setLevel(logging.INFO)
+        handlerFile.setFormatter(
+            logging.Formatter("[%(asctime)s] %(message)s"))
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(handlerSh)
         self.logger.addHandler(handlerFile)

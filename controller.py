@@ -55,14 +55,14 @@ def runBot(strategy, intervalSec=10, lot=1, period=60):
                 if signal:
                     client.close_position(qty)
                     msg = "[{time}] close position price:{price} amount:{lot}".format(
-                        time=ohlc.close_time_str, price=ohlc.close, lot=lot)
+                        time=ohlc.close_time_str(), price=ohlc.close, lot=lot)
                     logger.log_and_notify(msg)
             else:
                 side = strategy.entrySignal(ohlc, l_ohlc)
                 if side != "":
                     client.create_limit_order(side, ohlc.close, lot)
                     msg = "[{time}] entry:{side} price:{price} amount:{lot}".format(
-                        time=ohlc.close_time_str, side=side, price=ohlc.close, lot=lot)
+                        time=ohlc.close_time_str(), side=side, price=ohlc.close, lot=lot)
                     logger.log_and_notify(msg)
 
             l_ohlc = ohlc
@@ -75,5 +75,4 @@ def runBot(strategy, intervalSec=10, lot=1, period=60):
 # print(client.handle(client.cancel_all_orders))
 # notifier.notify("ゴリラ")
 # print(client.get_price(60))
-
-logger.log_and_notify("テスト")
+# logger.log_and_notify("テスト")

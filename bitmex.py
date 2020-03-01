@@ -40,13 +40,22 @@ class Bitmex:
         self.bitmex.secret = secret
 
     @with_error_handle
-    def get_price(self, sec):
+    def get_price(self, periods=60, before=0, after=0):
+        params = {"periods": periods}
+        if before != 0:
+            params["before"] = before
+        if after != 0:
+            params["after"] = after
+
         res = requests.get(
-            base_url + '/ohlc', params={"periods": sec})
+            base_url + '/ohlc', params=params)
         res = res.json()
-        datalist = res["result"][str(sec)]  # 確定している最新の足
+        datalist = res["result"][str(periods)]
 
         ohlclist = []
+        if datalist == None:
+            return ohlclist
+
         for data in datalist:
             ohlclist.append(
                 ohlc.Ohlc(data[0], data[1], data[2], data[3], data[4]))

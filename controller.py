@@ -6,6 +6,7 @@ from notification import line
 from datetime import datetime
 import calendar
 import time
+from notification import mylogger
 
 # config.iniファイルから設定情報を取得
 config_ini = configparser.ConfigParser()
@@ -13,9 +14,10 @@ config_ini.read("config.ini", encoding="utf-8")
 apiKey = config_ini.get("bitmex", "apiKey")
 apiSecret = config_ini.get("bitmex", "apiSecret")
 line_token = config_ini.get("LINE", "token")
+log_path = config_ini.get("LOG", "path")
 
 client = bitmex.Bitmex(apiKey, apiSecret)
-notifier = line.LineNotifier(line_token)
+logger = mylogger.BotLogger(log_path, line_token)
 
 
 def cancel_all_orders(orders, interval):
@@ -54,23 +56,24 @@ def runBot(strategy, intervalSec=10, lot=1, period=60):
                     client.close_position(qty)
                     msg = "[{time}] close position price:{price} amount:{lot}".format(
                         time=ohlc.close_time_str, price=ohlc.close, lot=lot)
-                    print(msg)
-                    notifier.notify(msg)
+                    logger.log_and_notify(msg)
             else:
                 side = strategy.entrySignal(ohlc, l_ohlc)
                 if side != "":
                     client.create_limit_order(side, ohlc.close, lot)
                     msg = "[{time}] entry:{side} price:{price} amount:{lot}".format(
                         time=ohlc.close_time_str, side=side, price=ohlc.close, lot=lot)
-                    print(msg)
-                    notifier.notify(msg)
+                    logger.log_and_notify(msg)
+
             l_ohlc = ohlc
 
         time.sleep(intervalSec)
 
 
-runBot(sanpei.Sanpei(), intervalSec=10, lot=1, period=60)
+# runBot(sanpei.Sanpei(), intervalSec=10, lot=1, period=60)
 # print(client.handle(client.get_price_by_idx, 60))
 # print(client.handle(client.cancel_all_orders))
 # notifier.notify("ゴリラ")
 # print(client.get_price(60))
+
+logger.log_and_notify("テスト")

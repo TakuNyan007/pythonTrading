@@ -14,16 +14,11 @@ BUY = "buy"
 SELL = "sell"
 
 
-class Bitmex:
-    def __init__(self, apiKey, secret):
-        self.bitmex = ccxt.bitmex()
-        self.bitmex.apiKey = apiKey
-        self.bitmex.secret = secret
-
-    def handle(self, func, *args):
+def with_error_handle(func):
+    def wrapper(*args, **kwargs):
         while True:
             try:
-                return func(*args)
+                return func(*args, **kwargs)
             except requests.exceptions.RequestException as e:
                 print("request error:", e)
                 print("try again after 5 seconds.")
@@ -32,7 +27,16 @@ class Bitmex:
                 print("ccxt error: ", e)
                 print("try again after 5 seconds.")
                 time.sleep(5)
+    return wrapper
 
+
+class Bitmex:
+    def __init__(self, apiKey, secret):
+        self.bitmex = ccxt.bitmex()
+        self.bitmex.apiKey = apiKey
+        self.bitmex.secret = secret
+
+    @with_error_handle
     def get_price(self, sec):
         res = requests.get(
             base_url + '/ohlc', params={"periods": sec})
@@ -45,6 +49,7 @@ class Bitmex:
                 ohlc.Ohlc(data[0], data[1], data[2], data[3], data[4]))
         return ohlclist
 
+    @with_error_handle
     def get_price_by_idx(self, sec, idx=-2):
         res = requests.get(
             base_url + '/ohlc', params={"periods": sec})
@@ -52,6 +57,7 @@ class Bitmex:
         data = res["result"][str(sec)][idx]
         return ohlc.Ohlc(data[0], data[1], data[2], data[3], data[4])
 
+    @with_error_handle
     def create_limit_order(self, side, price, amount):
         order = self.bitmex.create_order(
             symbol=BTC_USD,
@@ -62,16 +68,19 @@ class Bitmex:
         )
         return order
 
+    @with_error_handle
     def fetch_open_orders(self):
         orders = self.bitmex.fetch_open_orders(symbol='BTC/USD')
         return orders
 
+    @with_error_handle
     def cancel_all_orders(self):
         orders = self.fetch_open_orders()
         for o in orders:
             r = self.bitmex.cancel_order(symbol=BTC_USD, id=o["id"])
             pprint(r)
 
+    @with_error_handle
     def get_position(self):
         positions = self.bitmex.private_get_position()
         for p in positions:
@@ -79,10 +88,12 @@ class Bitmex:
                 return p["currentQty"]
         return None
 
+    @with_error_handle
     def close_position(self, qty):
         side = BUY if qty < 0 else SELL
         return self.create_market_order(side, abs(qty))
 
+    @with_error_handle
     def create_market_order(self, side, amount):
         order = self.bitmex.create_order(
             symbol=BTC_USD,

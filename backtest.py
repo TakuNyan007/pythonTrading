@@ -7,6 +7,7 @@ import calendar
 import time
 from notification import mylogger
 from myutil import myjson
+import json
 
 # config.iniファイルから設定情報を取得
 config_ini = configparser.ConfigParser()
@@ -17,6 +18,8 @@ log_path = config_ini.get("LOG", "path")
 
 client = bitmex.Bitmex(apiKey, apiSecret)
 logger = mylogger.BotLogger(log_path, None)
+
+OHLC_FILE_PATH = "./ohlc.json"
 
 
 def print_get_price_result(price):
@@ -32,6 +35,13 @@ def print_get_price_result(price):
     print("--------------------------")
 
 
+def get_price_from_json(path=OHLC_FILE_PATH):
+    file = open(path, 'r', encoding='utf-8')
+    price = json.load(file)
+    return price
+
+
 price = client.get_price(periods=60, after=1521849600)
 print_get_price_result(price)
-myjson.save_as_json(price, "./test.json")
+myjson.save_as_json(price, OHLC_FILE_PATH)
+hoge = get_price_from_json()

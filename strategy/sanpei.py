@@ -11,7 +11,8 @@ class Sanpei:
         self.signal = 0
 
     def check_candle(self, data: ohlc.Ohlc):
-        realbody_rate = abs(data.close - data.open)/(data.high - data.low)
+        realbody_rate = 0 if data.high - \
+            data.low == 0 else abs(data.close - data.open)/(data.high - data.low)
         increase_rate = abs(data.close / data.open - 1)
 
         if increase_rate < PARAM_INCREASE_RATE:
@@ -49,9 +50,11 @@ class Sanpei:
             print("3本連続陰線です。売りシグナル点灯しました。")
             return "sell"
 
+        return ""
+
     def closeSignal(self, data, last_data):
-        if not abs(self.signal) != 3:
-            return
+        if not abs(self.signal) == 3:
+            raise EnvironmentError
 
         if self.signal == 3 and (data.close - last_data.close < 0):
             self.signal = 0

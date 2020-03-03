@@ -12,7 +12,7 @@ class BotLogger():
             self.notifier = None
 
         # ログの設定
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(__name__+log_path)
         handlerSh = logging.StreamHandler()
         handlerFile = logging.FileHandler(filename=log_path, encoding="utf-8")
         handlerSh.setLevel(logging.INFO)

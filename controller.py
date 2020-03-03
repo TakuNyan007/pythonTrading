@@ -9,6 +9,8 @@ import time
 from notification import mylogger
 import backtest
 from strategy.models import testresult
+from myutil import myjson
+
 
 # config.iniファイルから設定情報を取得
 config_ini = configparser.ConfigParser()
@@ -20,7 +22,6 @@ log_path = config_ini.get("LOG", "path")
 
 client = bitmex.Bitmex(apiKey, apiSecret)
 logger = mylogger.BotLogger(log_path, line_token)
-testlogger = mylogger.BotLogger("./test.log", None)
 
 
 def cancel_all_orders(orders, interval):
@@ -81,8 +82,6 @@ def runBot(strategy=sanpei.Sanpei(), lot=1, period=60, mode=MODE_BACK_TEST):
 
                     if is_backtest:
                         result.close(exit_price=ohlc.close)
-                        testlogger.print_log(msg)
-
                     else:
                         client.close_position(qty)
                         logger.log_and_notify(msg)
@@ -93,7 +92,6 @@ def runBot(strategy=sanpei.Sanpei(), lot=1, period=60, mode=MODE_BACK_TEST):
                         time=ohlc.close_time_str(), side=side, price=ohlc.close, lot=lot)
                     if is_backtest:
                         result.entry(side, lot, ohlc.close)
-                        testlogger.print_log(msg)
                     else:
                         client.create_limit_order(side, ohlc.close, lot)
                         logger.log_and_notify(msg)
@@ -110,10 +108,8 @@ def runBot(strategy=sanpei.Sanpei(), lot=1, period=60, mode=MODE_BACK_TEST):
     print(f'{len(ohlc_list)}本のバックテストに{round(t2-t1)}秒かかりました')
 
 
+""" price = client.get_price(periods=900, after=1521849600)
+backtest.print_get_price_result(price)
+myjson.save_as_json(price, backtest.OHLC_FILE_PATH) """
+
 runBot()
-# runBot(sanpei.Sanpei(), intervalSec=10, lot=1, period=60)
-# print(client.handle(client.get_price_by_idx, 60))
-# print(client.handle(client.cancel_all_orders))
-# notifier.notify("ゴリラ")
-# print(client.get_price(60))
-# logger.log_and_notify("テスト")

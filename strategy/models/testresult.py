@@ -1,4 +1,5 @@
 import numpy as np
+from notification import mylogger
 
 TAKER_FEE = 0.00075
 MAKER_FEE = -0.00025
@@ -20,6 +21,8 @@ class BackTestResult():
         self.entry_price = None
         self.side = ""
         self.qty = 0
+
+        self.result_logger = mylogger.BotLogger("./result.log", None)
 
     def entry(self, side, lot, entry_price):
         self.entry_price = entry_price
@@ -43,6 +46,8 @@ class BackTestResult():
                 round(buy_profit / self.entry_price * 100, 4))
             if buy_profit > 0:
                 self.buy_winning += 1
+            self.result_logger.print_log(
+                f'BUY  Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(buy_profit).rjust(6)}')
 
         if self.side == "sell":
             sell_profit = (self.entry_price - exit_price) * \
@@ -53,6 +58,8 @@ class BackTestResult():
                 round(sell_profit / self.entry_price * 100, 4))
             if sell_profit > 0:
                 self.sell_winning += 1
+            self.result_logger.print_log(
+                f'SELL Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(sell_profit).rjust(6)}')
 
         self.qty = 0
         self.side = ""
@@ -93,5 +100,5 @@ class BackTestResult():
         print("手数料合計    :  {}円".format(np.sum(self.slippage)))
 
         # ログファイルの出力
-        file = open(file_path, 'wt', encoding='utf-8')
-        file.writelines(self.log)
+        # file = open(file_path, 'wt', encoding='utf-8')
+        # file.writelines(self.log)

@@ -8,6 +8,7 @@ import time
 from notification import mylogger
 from myutil import myjson
 import json
+from strategy.models import ohlc
 
 # config.iniファイルから設定情報を取得
 config_ini = configparser.ConfigParser()
@@ -37,11 +38,17 @@ def print_get_price_result(price):
 
 def get_price_from_json(path=OHLC_FILE_PATH):
     file = open(path, 'r', encoding='utf-8')
-    price = json.load(file)
-    return price
+    ohlc_dict_list = json.load(fp=file)  # jsonをObjectにパースする方法がわからない
+    ohlc_list = []
+    for data in ohlc_dict_list:
+        ohlc_list.append(ohlc.Ohlc(
+            data["close_time"], data["open"], data["high"], data["low"], data["close"]))
+
+    return ohlc_list
 
 
-price = client.get_price(periods=60, after=1521849600)
-print_get_price_result(price)
-myjson.save_as_json(price, OHLC_FILE_PATH)
-hoge = get_price_from_json()
+#price = client.get_price(periods=60, after=1521849600)
+# print_get_price_result(price)
+#myjson.save_as_json(price, OHLC_FILE_PATH)
+#hoge = get_price_from_json()
+# print("end")

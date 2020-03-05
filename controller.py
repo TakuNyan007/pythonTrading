@@ -73,7 +73,7 @@ def runBot(strategy=sanpei.Sanpei(), lot=1, period=60, mode=MODE_BACK_TEST):
 
         if ohlc.close_time != l_ohlc.close_time:
             ohlc.print_price()
-            qty = result.qty if is_backtest else client.get_position()  # TODO: change lot
+            qty = result.qty if is_backtest else client.get_position()
             if qty != 0:
                 signal = strategy.closeSignal(ohlc, l_ohlc)
                 if signal:
@@ -81,7 +81,8 @@ def runBot(strategy=sanpei.Sanpei(), lot=1, period=60, mode=MODE_BACK_TEST):
                         time=ohlc.close_time_str(), price=ohlc.close, lot=lot)
 
                     if is_backtest:
-                        result.close(exit_price=ohlc.close)
+                        result.close(exit_price=ohlc.close,
+                                     close_time_str=ohlc.close_time_str())
                     else:
                         client.close_position(qty)
                         logger.log_and_notify(msg)
@@ -106,6 +107,7 @@ def runBot(strategy=sanpei.Sanpei(), lot=1, period=60, mode=MODE_BACK_TEST):
             time.sleep(intervalSec)
     t2 = time.time()
     print(f'{len(ohlc_list)}本のバックテストに{round(t2-t1)}秒かかりました')
+    result.plotProfitChart()
 
 
 """ price = client.get_price(periods=900, after=1521849600)

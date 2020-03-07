@@ -1,15 +1,8 @@
-import bitmex
-import configparser
-from strategy import sanpei
-from strategy.models import status
-from notification import line
 from datetime import datetime
 import calendar
 import time
-from notification import mylogger
 import backtest
 from strategy.models import testresult
-from myutil import myjson
 
 MODE_BACK_TEST = "MODE_BACK_TEST"
 MODE_REAL_TRADE = "MODE_REAL_TRADE"

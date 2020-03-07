@@ -1,11 +1,5 @@
-import bitmex
 import configparser
-from strategy import sanpei
-from strategy.models import status
 from datetime import datetime
-import calendar
-import time
-from notification import mylogger
 from myutil import myjson
 import json
 from strategy.models import ohlc

@@ -49,3 +49,5 @@ def get_price_from_json(path=OHLC_FILE_PATH):
 #myjson.save_as_json(price, OHLC_FILE_PATH)
 #hoge = get_price_from_json()
 # print("end")
+if __name__ == '__main__':
+    pass

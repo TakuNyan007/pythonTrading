@@ -12,3 +12,7 @@ def obj_json_default(obj):
 def save_as_json(obj_list, file_path, indent=4):
     file = open(file_path, "w", encoding="utf-8")
     json.dump(obj_list, fp=file, indent=indent, default=obj_json_default)
+
+
+if __name__ == "__main__":
+    pass

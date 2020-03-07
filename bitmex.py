@@ -114,3 +114,7 @@ class Bitmex:
             amount=amount
         )
         return order
+
+
+if __name__ == '__main__':
+    pass

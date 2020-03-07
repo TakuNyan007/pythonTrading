@@ -31,3 +31,7 @@ class BotLogger():
         self.print_log(text)
         if self.notifier:
             self.notifier.notify(text)
+
+
+if __name__ == "__main__":
+    pass

@@ -17,3 +17,7 @@ class Ohlc:
     def close_time_str(self):
         return datetime.fromtimestamp(
             self.close_time).strftime('%Y/%m/%d %H:%M')
+
+
+if __name__ == '__main__':
+    pass

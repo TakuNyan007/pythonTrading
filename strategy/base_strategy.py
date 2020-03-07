@@ -1,19 +1,30 @@
 from datetime import datetime
 import calendar
 import time
-import backtest
-from strategy.models import testresult
+from strategy.models import testresult, ohlc
 from abc import ABCMeta, abstractmethod
+import json
 
 MODE_BACK_TEST = "MODE_BACK_TEST"
 MODE_REAL_TRADE = "MODE_REAL_TRADE"
+OHLC_FILE_PATH = "./ohlc.json"
 
 
-class Strategy:
+class Strategy(metaclass=ABCMeta):
     def __init__(self, client, logger):
         self.client = client
         self.logger = logger
         self.test_result = None
+
+    def get_price_from_json(self, path=OHLC_FILE_PATH):
+        file = open(path, 'r', encoding='utf-8')
+        ohlc_dict_list = json.load(fp=file)  # jsonをObjectにパースする方法がわからない
+        ohlc_list = []
+        for data in ohlc_dict_list:
+            ohlc_list.append(ohlc.Ohlc(
+                data["close_time"], data["open"], data["high"], data["low"], data["close"]))
+
+        return ohlc_list
 
     def cancel_all_orders(self, orders, interval):
         if len(orders) == 0:
@@ -32,7 +43,7 @@ class Strategy:
         ohlc_list = None
         is_backtest = mode != MODE_REAL_TRADE
         if is_backtest:
-            ohlc_list = backtest.get_price_from_json()  # バックテストのみで使用
+            ohlc_list = self.get_price_from_json()  # バックテストのみで使用
             self.test_result = testresult.BackTestResult()
 
         l_ohlc = None

@@ -45,7 +45,7 @@ class BackTestResult():
         #trade_cost = entry_trade_cost + exit_trade_cost
         # self.slippage.append(trade_cost)
         trade_cost = 0
-
+        dotenSide = ""
         if self.side == "buy":
             buy_profit = (exit_price - self.entry_price) * \
                 self.qty - trade_cost
@@ -58,7 +58,7 @@ class BackTestResult():
             self.gross_profit.append(self.gross_profit[-1] + buy_profit)
             self.result_logger.print_log(
                 f'BUY  Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(buy_profit).rjust(6)}')
-
+            dotenSide = "sell"
         if self.side == "sell":
             sell_profit = (self.entry_price - exit_price) * \
                 self.qty - trade_cost
@@ -71,6 +71,7 @@ class BackTestResult():
             self.gross_profit.append(self.gross_profit[-1] + sell_profit)
             self.result_logger.print_log(
                 f'SELL Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(sell_profit).rjust(6)}')
+            dotenSide = "buy"
 
         drawdown = max(self.gross_profit) - self.gross_profit[-1]
         if drawdown > 0 and drawdown > self.max_drawdown:
@@ -78,6 +79,7 @@ class BackTestResult():
         self.qty = 0
         self.side = ""
         self.entry_price = None
+        return dotenSide
 
     def print_result(self, file_path):
         print("バックテストの結果")

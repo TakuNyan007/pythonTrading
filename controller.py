@@ -1,6 +1,8 @@
 from bitmex import Bitmex
 import configparser
 from strategy import sanpei
+from strategy import donchian
+
 from notification import line
 from notification.mylogger import BotLogger
 
@@ -16,5 +18,9 @@ log_path = config_ini.get("LOG", "path")
 client = Bitmex(apiKey, apiSecret)
 logger = BotLogger(log_path, line_token)
 
-sanpei = sanpei.Sanpei(client, logger)
+donchian = donchian.Donchian(client, logger, 20)
+donchian.run_bot()
+
+""" sanpei = sanpei.Sanpei(client, logger)
 sanpei.run_bot()
+ """

@@ -3,6 +3,7 @@ import calendar
 import time
 import backtest
 from strategy.models import testresult
+from abc import ABCMeta, abstractmethod
 
 MODE_BACK_TEST = "MODE_BACK_TEST"
 MODE_REAL_TRADE = "MODE_REAL_TRADE"
@@ -94,9 +95,11 @@ class Strategy:
         print(f'{len(ohlc_list)}本のバックテストに{round(t2-t1)}秒かかりました')
         self.test_result.plotProfitChart()
 
+    @abstractmethod
     def closeSignal(self, ohlc, l_ohlc):
         return ""
 
+    @abstractmethod
     def entrySignal(self, ohlc, l_ohlc):
         return False
 

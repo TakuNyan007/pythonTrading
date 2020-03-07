@@ -44,7 +44,7 @@ class Strategy:
 
             # 初回ループ時のみl_ohlcにohlcをセット
             if l_ohlc == None:
-                ohlc.print_price()
+                # ohlc.print_price() # ←これをやるとめちゃくちゃ遅くなるのでコメントアウト
                 l_ohlc = ohlc
                 idx += 1
                 continue
@@ -56,7 +56,7 @@ class Strategy:
                     self.cancel_all_orders(orders, intervalSec)
 
             if ohlc.close_time != l_ohlc.close_time:
-                ohlc.print_price()
+                # ohlc.print_price() # ←これをやるとめちゃくちゃ遅くなるのでコメントアウト
                 qty = self.test_result.qty if is_backtest else self.client.get_position()
                 if qty != 0:
                     signal = self.closeSignal(ohlc, l_ohlc)

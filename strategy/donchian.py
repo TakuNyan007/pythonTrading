@@ -16,10 +16,10 @@ class Donchian(Strategy):
     def entrySignal(self, data, l_ohlc_list):
         highest = max(i.high for i in l_ohlc_list)
         lowest = min(i.low for i in l_ohlc_list)
-        if data.high > highest:
+        if data.close > highest:
             self.last_side = BUY
             return BUY
-        if data.low < lowest:
+        if data.close < lowest:
             self.last_side = SELL
             return SELL
         return NO_ENTRY

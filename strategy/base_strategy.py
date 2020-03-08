@@ -41,13 +41,16 @@ class Strategy(metaclass=ABCMeta):
             self.client.cancel_all_orders()
             print("注文が" + (interval * 5) + "秒以内に約定しなかったため、キャンセルしました。")
 
-    def run_bot(self, lot=1, period=60, mode=MODE_BACK_TEST):
+    def run_bot(self, lot=1, period=60, mode=MODE_BACK_TEST, ohlc_list=[]):
         t1 = time.time()
 
-        ohlc_list = None
+        # ohlc_list = None
         is_backtest = mode != MODE_REAL_TRADE
         if is_backtest:
-            ohlc_list = self.get_price_from_json()  # バックテストのみで使用
+            if len(ohlc_list) == 0:
+                print("ohlc_listが空だよ")
+                return
+            # ohlc_list = self.get_price_from_json()  # バックテストのみで使用
             self.test_result = testresult.BackTestResult()
 
         l_ohlc_list = []
@@ -87,9 +90,7 @@ class Strategy(metaclass=ABCMeta):
                         else:
                             self.client.close_position(qty)
                             self.logger.log_and_notify(msg)
-                            if isDoten:
-                                pass
-                                # TODO: Implement Doten logic
+                            # TODO: Implement Doten logic
                 else:  # isDoten = True となるStrategyのときはここは初回Entry時のみ通る
                     side = self.entrySignal(ohlc, l_ohlc_list)
                     if side != "":
@@ -106,14 +107,15 @@ class Strategy(metaclass=ABCMeta):
 
             idx += 1
             if idx >= len(ohlc_list):
-                self.test_result.print_result("./result.txt")
+                # self.test_result.print_result("./result.txt")
                 break
 
             if not is_backtest:
                 time.sleep(intervalSec)
         t2 = time.time()
-        print(f'{len(ohlc_list)}本のバックテストに{round(t2-t1)}秒かかりました')
-        self.test_result.plotProfitChart()
+        print(
+            f'{period/60}分足 {self.term}期間：{len(ohlc_list)}本のバックテストに{t2-t1}秒かかりました')
+        # self.test_result.plotProfitChart()
 
     @abstractmethod
     def closeSignal(self, ohlc, l_ohlc_list):

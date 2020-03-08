@@ -56,8 +56,8 @@ class BackTestResult():
             if buy_profit > 0:
                 self.buy_winning += 1
             self.gross_profit.append(self.gross_profit[-1] + buy_profit)
-            self.result_logger.print_log(
-                f'BUY  Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(buy_profit).rjust(6)}')
+            # self.result_logger.print_log(
+            #    f'BUY  Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(buy_profit).rjust(6)}')
             dotenSide = "sell"
         if self.side == "sell":
             sell_profit = (self.entry_price - exit_price) * \
@@ -69,8 +69,8 @@ class BackTestResult():
             if sell_profit > 0:
                 self.sell_winning += 1
             self.gross_profit.append(self.gross_profit[-1] + sell_profit)
-            self.result_logger.print_log(
-                f'SELL Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(sell_profit).rjust(6)}')
+            # self.result_logger.print_log(
+            #    f'SELL Entry:{str(self.entry_price).rjust(8)} Close:{str(exit_price).rjust(8)} Profit:{str(sell_profit).rjust(6)}')
             dotenSide = "buy"
 
         drawdown = max(self.gross_profit) - self.gross_profit[-1]
@@ -80,6 +80,26 @@ class BackTestResult():
         self.side = ""
         self.entry_price = None
         return dotenSide
+
+    def get_result(self):
+        buy_profit = np.sum(self.buy_profit)
+        sell_profit = np.sum(self.sell_profit)
+
+        return {
+            "buy_count": self.buy_count,
+            "buy_win_rate": round(self.buy_winning / self.buy_count * 100, 1),
+            "buy_return_avg": round(np.average(self.buy_return), 4),
+            "buy_profit": buy_profit,
+            "sell_count": self.sell_count,
+            "sell_win_rate": round(self.sell_winning / self.sell_count * 100, 1),
+            "sell_return_avg": round(np.average(self.sell_return), 4),
+            "sell_profit": sell_profit,
+            "count": self.buy_count + self.sell_count,
+            "win_rate": round((self.buy_winning + self.sell_winning)/(self.buy_count + self.sell_count)*100, 1),
+            "return_avg": round(np.average(self.buy_return + self.sell_return), 4),
+            "profit": buy_profit + sell_profit,
+            "drawdown": self.max_drawdown
+        }
 
     def print_result(self, file_path):
         print("バックテストの結果")

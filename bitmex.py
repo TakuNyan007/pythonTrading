@@ -57,6 +57,10 @@ class Bitmex:
             return ohlclist
 
         for data in datalist:
+            if data[1] == 0 or data[2] == 0 or data[3] == 0 or data[4] == 0:
+                print(
+                    f'[periods: {periods}sec][timestamp: {data[0]}] 不正データです. スキップします.')
+                continue
             ohlclist.append(
                 ohlc.Ohlc(data[0], data[1], data[2], data[3], data[4]))
         return ohlclist

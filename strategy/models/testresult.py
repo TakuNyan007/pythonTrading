@@ -82,22 +82,40 @@ class BackTestResult():
         return dotenSide
 
     def get_result(self):
-        buy_profit = np.sum(self.buy_profit)
-        sell_profit = np.sum(self.sell_profit)
+        bp = pd.DataFrame({
+            "BuyProfit": self.buy_profit
+        })
+
+        sp = pd.DataFrame({
+            "SellProfit": self.sell_profit
+        })
+
+        buy_profit_loss = bp.BuyProfit.sum()
+        sell_profit_loss = sp.SellProfit.sum()
+        buy_profit_sum = bp[bp.BuyProfit > 0].BuyProfit.sum()
+        sell_profit_sum = sp[sp.SellProfit > 0].SellProfit.sum()
+        buy_loss_sum = bp[bp.BuyProfit < 0].BuyProfit.sum()
+        sell_loss_sum = sp[sp.SellProfit < 0].SellProfit.sum()
 
         return {
             "buy_count": self.buy_count,
             "buy_win_rate": round(self.buy_winning / self.buy_count * 100, 1),
             "buy_return_avg": round(np.average(self.buy_return), 4),
-            "buy_profit": buy_profit,
+            "buy_profit": buy_profit_sum,
+            "buy_loss": buy_loss_sum,
+            "buy_profit_loss": buy_profit_loss,
             "sell_count": self.sell_count,
             "sell_win_rate": round(self.sell_winning / self.sell_count * 100, 1),
             "sell_return_avg": round(np.average(self.sell_return), 4),
-            "sell_profit": sell_profit,
+            "sell_profit": sell_profit_sum,
+            "sell_loss": sell_loss_sum,
+            "sell_profit_loss": sell_profit_loss,
             "count": self.buy_count + self.sell_count,
             "win_rate": round((self.buy_winning + self.sell_winning)/(self.buy_count + self.sell_count)*100, 1),
             "return_avg": round(np.average(self.buy_return + self.sell_return), 4),
-            "profit": buy_profit + sell_profit,
+            "profit": buy_profit_sum + sell_profit_sum,
+            "loss": buy_loss_sum + sell_loss_sum,
+            "PF": round(-1 * (buy_profit_sum + sell_profit_sum)/(buy_loss_sum + sell_loss_sum), 2),
             "drawdown": self.max_drawdown
         }
 

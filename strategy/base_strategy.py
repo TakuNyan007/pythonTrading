@@ -20,6 +20,9 @@ class Strategy(metaclass=ABCMeta):
         self.test_result = None
         self.term = 1  # 継承先でOverride
 
+        self.entry_sides = []
+        self.entry_prices = []
+
     def get_price_from_json(self, path=OHLC_FILE_PATH):
         file = open(path, 'r', encoding='utf-8')
         ohlc_dict_list = json.load(fp=file)  # jsonをObjectにパースする方法がわからない
@@ -87,6 +90,8 @@ class Strategy(metaclass=ABCMeta):
                                 exit_price=ohlc.close, close_time_str=ohlc.close_time_str())
                             if isDoten:
                                 self.test_result.entry(side, lot, ohlc.close)
+                                self.entry_prices.append(ohlc.close)
+                                self.entry_sides.append(side)
                         else:
                             self.client.close_position(qty)
                             self.logger.log_and_notify(msg)
@@ -98,11 +103,15 @@ class Strategy(metaclass=ABCMeta):
                             time=ohlc.close_time_str(), side=side, price=ohlc.close, lot=lot)
                         if is_backtest:
                             self.test_result.entry(side, lot, ohlc.close)
+                            self.entry_prices.append(ohlc.close)
+                            self.entry_sides.append(side)
                         else:
                             self.client.create_limit_order(
                                 side, ohlc.close, lot)
                             self.logger.log_and_notify(msg)
-                del l_ohlc_list[0]
+                            self.entry_prices.append(ohlc.close)
+                            self.entry_sides.append(side)
+                # del l_ohlc_list[0]
                 l_ohlc_list.append(ohlc)
 
             idx += 1

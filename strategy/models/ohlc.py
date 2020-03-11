@@ -1,7 +1,12 @@
 import dataclasses
 from datetime import datetime
+#from numba import jitclass, float64, int32
+
+# spec = [("close_time", int32), ("open", float64),
+#        ("high", float64), ("low", float64), ("close", float64)]
 
 
+# @jitclass(spec)
 @dataclasses.dataclass(frozen=True)
 class Ohlc:
     close_time: int

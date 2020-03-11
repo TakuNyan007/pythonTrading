@@ -21,9 +21,10 @@ log_path = config_ini.get("LOG", "path")
 client = Bitmex(apiKey, apiSecret)
 logger = BotLogger(log_path, line_token)
 
+
 past6000 = round(time.time()) - 6000 * 3600
 ohlc_list = client.get_price(periods=3600, after=past6000)
-don = donchian.Donchian(client, logger, 28)
+don = donchian.Donchian(client, logger, 28, 20)
 don.run_bot(ohlc_list=ohlc_list)
 don.test_result.plotProfitChart()
 
@@ -77,7 +78,7 @@ drawdown_list = []
 tt_s = time.time()
 for sec, term in combinations:
     ohlc_list = ohlc_dict[str(sec)]
-    don = donchian.Donchian(client, None, term)
+    don = donchian.Donchian(client, None, term, 20)
     don.run_bot(lot=1, period=sec, ohlc_list=ohlc_list)
     result = don.test_result.get_result()
 

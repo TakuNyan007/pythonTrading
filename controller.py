@@ -1,4 +1,4 @@
-from bitmex import Bitmex
+from bitmex import Bitmex, T, O, H, L, C, V
 import configparser
 from strategy import sanpei
 from strategy import donchian
@@ -9,6 +9,10 @@ from notification.mylogger import BotLogger
 import time
 import pandas as pd
 from datetime import datetime
+
+import numpy as np
+from strategy.utils import indicator
+import timeit
 
 # config.iniファイルから設定情報を取得
 config_ini = configparser.ConfigParser()
@@ -21,7 +25,27 @@ log_path = config_ini.get("LOG", "path")
 client = Bitmex(apiKey, apiSecret)
 logger = BotLogger(log_path, line_token)
 
+hoge = client.get_price_np()
 
+""" a = indicator.sma(hoge[C], term=25)
+b = indicator.sma_pd(hoge[C], term=25)
+print(a, b) """
+
+
+result = timeit.timeit(
+    'indicator.sma(hoge[C])', globals=globals(), number=6000)
+
+result2 = timeit.timeit(
+    'indicator.sma_pd(hoge[C])', globals=globals(), number=6000)
+
+print("[sma] 6000loop:", result, "[s] 1loop:", result/6000, "[s]")
+print("[sma_pd] 6000loop:", result2, "[s] 1loop:", result2/6000, "[s]")
+
+""" result = timeit.timeit(
+    'indicator.sma_pd(hoge[C].tolist(), 5)', globals=globals(), number=6000)
+ """
+
+'''
 past6000 = round(time.time()) - 6000 * 3600
 ohlc_list = client.get_price(periods=3600, after=past6000)
 don = donchian.Donchian(client, logger, 28, 20)
@@ -157,3 +181,4 @@ df = df[["時間軸",
          "売り損益"]]
 
 df.to_csv(f'result-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.csv')
+'''

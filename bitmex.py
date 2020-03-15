@@ -6,12 +6,22 @@ import calendar
 import time
 from strategy.models import ohlc
 
+import numpy as np
+
 base_url = 'https://api.cryptowat.ch/markets/bitmex/btcusd-perpetual-futures'
 BTC_USD = "BTC/USD"
 LIMIT = "limit"
 MARKET = "market"
 BUY = "buy"
 SELL = "sell"
+
+# Cryptwatch data
+T = 0
+O = 1
+H = 2
+L = 3
+C = 4
+V = 5
 
 
 # @with_error_handleデコレータをつけると例外処理付きで実行できます
@@ -38,6 +48,40 @@ class Bitmex:
         self.bitmex = ccxt.bitmex()
         self.bitmex.apiKey = apiKey
         self.bitmex.secret = secret
+
+    @with_error_handle
+    def get_price_np(self, periods=60, before=0, after=0):
+        params = {"periods": periods}
+        if before != 0:
+            params["before"] = before
+        if after != 0:
+            params["after"] = after
+
+        res = requests.get(
+            base_url + '/ohlc', params=params)
+        res = res.json()
+        datalist = res["result"][str(periods)]
+        if datalist == None:
+            return np.array([])
+
+        t_list = []
+        o_list = []
+        h_list = []
+        l_list = []
+        c_list = []
+        v_list = []
+        for data in datalist:
+            if data[O] == 0 or data[H] == 0 or data[L] == 0 or data[C] == 0:
+                print(
+                    f'[periods: {periods}sec][timestamp: {data[0]}] 不正データです. スキップします.')
+                continue
+            t_list.append(data[T])
+            o_list.append(data[O])
+            h_list.append(data[H])
+            l_list.append(data[L])
+            c_list.append(data[C])
+            v_list.append(data[V])
+        return np.array([t_list, o_list, h_list, l_list, c_list, v_list])
 
     @with_error_handle
     def get_price(self, periods=60, before=0, after=0):

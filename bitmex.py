@@ -15,6 +15,9 @@ MARKET = "market"
 BUY = "buy"
 SELL = "sell"
 
+TAKER_COST = 0.00075
+MARKET_COST = -0.00025
+
 # Cryptwatch data
 T = 0
 O = 1

@@ -3,6 +3,7 @@ import numpy as np
 from strategy.models.ohlc import Ohlc
 from typing import List
 from numba import jit
+from bitmex import T, O, H, L, C, V, BUY, SELL
 
 import time
 
@@ -52,14 +53,18 @@ def ema_pd(closeList=[], term=5):
 
 
 # @jit(nopython=True)
-def atr(ohlc_list=[], term=20):
-    last = ohlc_list[-(term + 1):]
+def atr(ohlc_list, term=20):
+    o = ohlc_list[O][-(term + 1):]
+    h = ohlc_list[H][-(term + 1):]
+    l = ohlc_list[L][-(term + 1):]
+    c = ohlc_list[C][-(term + 1):]
     tr_list = []
-    for i, data in enumerate(last):
+    for i, data in enumerate(h):
         if i == 0:
             continue
-        hc = data.high - last[i-1].close  # 当日の高値 - 前日の終値
-        cl = last[i-1].close - data.low  # 前日の終値 - 当日の安値
-        hl = data.high - data.low  # 当日の高値 - 当日の安値
+
+        hc = data - c[i-1]  # 当日の高値 - 前日の終値
+        cl = c[i-1] - l[i]  # 前日の終値 - 当日の安値
+        hl = data - l[i]  # 当日の高値 - 当日の安値
         tr_list.append(max(hc, cl, hl))
-    return round(ema_pd(tr_list, term)[-1], 1)
+    return round(ema(tr_list, term)[-1], 1)

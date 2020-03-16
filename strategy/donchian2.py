@@ -19,14 +19,15 @@ class Donchian(Strategy):
         highest = np.max(term_ohlc[H][:-1])  # term期間の最大値
         lowest = np.min(term_ohlc[L][:-1])  # term期間の最小値
         if entry_side == BUY:
-            if latest[C] < lowest:
+            if latest[L] < lowest:
                 return True, SELL
         if entry_side == SELL:
-            if latest[C] > highest:
+            if latest[H] > highest:
                 return True, BUY
         return False, NO_ENTRY  # closeSignal, dotenSignal
 
     def stop_loss_signal(self, term_ohlc):
+        return False
         latest = term_ohlc[:, -1]
         atrr = atr(term_ohlc[-self.term:], term=self.term)[-1]
         entry_side = self.entry_sides[-1]

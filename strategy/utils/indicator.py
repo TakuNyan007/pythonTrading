@@ -54,17 +54,12 @@ def ema_pd(closeList=[], term=5):
 
 # @jit(nopython=True)
 def atr(ohlc_list, term=20):
-    o = ohlc_list[O][-(term + 1):]
     h = ohlc_list[H][-(term + 1):]
     l = ohlc_list[L][-(term + 1):]
     c = ohlc_list[C][-(term + 1):]
-    tr_list = []
-    for i, data in enumerate(h):
-        if i == 0:
-            continue
-
-        hc = data - c[i-1]  # 当日の高値 - 前日の終値
-        cl = c[i-1] - l[i]  # 前日の終値 - 当日の安値
-        hl = data - l[i]  # 当日の高値 - 当日の安値
-        tr_list.append(max(hc, cl, hl))
-    return round(ema(tr_list, term)[-1], 1)
+    # TR = MAX(当日の高値 - 前日の終値, 前日の終値 - 当日の安値, 当日の高値 - 当日の安値)
+    tr_list = [
+        max(h[i]-c[i-1], c[i-1] - l[i], h[i]-l[i]) for i in range(1, len(h))
+    ]
+    # ATR = TRのEMA
+    return ema(tr_list, term)

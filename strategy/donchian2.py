@@ -27,6 +27,14 @@ class Donchian(Strategy):
         return False, NO_ENTRY  # closeSignal, dotenSignal
 
     def stop_loss_signal(self, term_ohlc):
+        latest = term_ohlc[:, -1]
+        atrr = atr(term_ohlc[-self.term:], term=self.term)[-1]
+        entry_side = self.entry_sides[-1]
+
+        if entry_side == BUY and latest[C] < (self.entry_prices[-1] - atrr):
+            return True
+        if entry_side == SELL and latest[C] > (self.entry_prices[-1] + atrr):
+            return True
         return False
 
     def entry_signal(self, term_ohlc):

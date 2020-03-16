@@ -119,7 +119,7 @@ for sec, term in combinations:
 
     profit = df[df["profit"] > 0]["profit"].sum()
     loss = df[df["profit"] < 0]["profit"].sum()
-    pf = profit / loss
+    pf = - profit / loss
 
     count_list.append(len(df))
     win_rate_list.append((len(buy_wins) + len(sell_wins)) / len(df) * 100)

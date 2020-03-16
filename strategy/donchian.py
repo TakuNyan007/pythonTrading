@@ -25,18 +25,14 @@ class Donchian(Strategy):
 
     def closeSignal(self, data, l_ohlc_list):
         last_term_list = l_ohlc_list[-self.term:]
-        atr_range = atr(ohlc_list=l_ohlc_list, term=self.atr_term)
+        #atr_range = atr(ohlc_list=l_ohlc_list, term=self.atr_term)
         highest = max(i.high for i in last_term_list)
         lowest = min(i.low for i in last_term_list)
         last_side = self.entry_sides[-1]
         if last_side == BUY:
-            if data.low < (self.entry_prices[-1] - atr_range):
-                return True, False  # 損切する. ドテンはしない
             if data.low < lowest:
                 return True, True
         if last_side == SELL:
-            if data.high > (self.entry_prices[-1] + atr_range):
-                return True, False  # 損切する. ドテンはしない
             if data.high > highest:
                 return True, True
         return False, False

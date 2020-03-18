@@ -10,40 +10,37 @@ class Donchian(Strategy):
         super().__init__(term)
         self.atr_term = atr_term
 
-    def close_signal(self, term_ohlc):
+    def close_signal(self, ohlc, term_ohlc):
         if self.position == 0:
             raise EnvironmentError(
                 "Method close_signal is called when you have no position.")
         entry_side = self.entry_sides[-1]
-        latest = term_ohlc[:, -1]
-        highest = np.max(term_ohlc[H][:-1])  # term期間の最大値
-        lowest = np.min(term_ohlc[L][:-1])  # term期間の最小値
+        highest = np.max(term_ohlc[H])  # term期間の最大値
+        lowest = np.min(term_ohlc[L])  # term期間の最小値
         if entry_side == BUY:
-            if latest[C] < lowest:
+            if ohlc[L] < lowest:
                 return True, SELL
         if entry_side == SELL:
-            if latest[C] > highest:
+            if ohlc[H] > highest:
                 return True, BUY
         return False, NO_ENTRY  # closeSignal, dotenSignal
 
-    def stop_loss_signal(self, term_ohlc):
-        latest = term_ohlc[:, -1]
-        atrr = atr(term_ohlc[-self.term:], term=self.term)[-1]
+    def stop_loss_signal(self, ohlc, term_ohlc):
+        atrr = atr(term_ohlc[-self.atr_term:], term=self.atr_term)[-1]
         entry_side = self.entry_sides[-1]
 
-        if entry_side == BUY and latest[C] < (self.entry_prices[-1] - atrr):
+        if entry_side == BUY and ohlc[C] < (self.entry_prices[-1] - atrr):
             return True
-        if entry_side == SELL and latest[C] > (self.entry_prices[-1] + atrr):
+        if entry_side == SELL and ohlc[C] > (self.entry_prices[-1] + atrr):
             return True
         return False
 
-    def entry_signal(self, term_ohlc):
-        latest = term_ohlc[:, -1]
-        highest = np.max(term_ohlc[H][:-1])  # term期間の最大値
-        lowest = np.min(term_ohlc[L][:-1])  # term期間の最小値
-        if latest[C] > highest:
+    def entry_signal(self, ohlc, term_ohlc):
+        highest = np.max(term_ohlc[H])  # term期間の最大値
+        lowest = np.min(term_ohlc[L])  # term期間の最小値
+        if ohlc[C] > highest:
             return BUY
-        if latest[C] < lowest:
+        if ohlc[C] < lowest:
             return SELL
         return NO_ENTRY
 

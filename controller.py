@@ -25,12 +25,12 @@ client = Bitmex(apiKey, apiSecret)
 logger = BotLogger(log_path, line_token)
 
 
-""" past6000 = round(time.time()) - 6000 * 3600
-ohlc_list = client.get_price_np(periods=3600, after=past6000)
-don = donchian2.Donchian(28, 20)
+past6000 = round(time.time()) - 6000 * 3600
+ohlc_list = client.get_price_np(periods=3600, after=1577804400)
+don = donchian2.Donchian(26, 20)
 don.run_bot(ohlc_list)
 don.plot_gross_plofit()
- """
+
 # バックテストのパラメーター設定
 chart_sec_list = [900, 1800, 3600, 7200, 14400, 21600]  # 時間足
 term_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -89,6 +89,7 @@ for sec, term in combinations:
     sec_list.append(sec)
     term_list.append(term)
 
+    """
     buys = df[df.entry_side.isin([BUY])]
     buy_count = len(buys)
     buy_profit_loss = buys["profit"].sum()
@@ -103,7 +104,7 @@ for sec, term in combinations:
     buy_loss_list.append(buy_loses["profit"].sum())
     buy_profit_loss_list.append(buy_profit_loss)
 
-    sells = df[df["entry_side"].isin([SELL])]
+    sells = df[df.entry_side.isin([SELL])]
     sell_count = len(sells)
     sell_profit_loss = sells["profit"].sum()
     sell_return_avg = sells["profit"].mean()
@@ -116,14 +117,18 @@ for sec, term in combinations:
     sell_profit_list.append(sell_wins["profit"].sum())
     sell_loss_list.append(sell_loses["profit"].sum())
     sell_profit_loss_list.append(sell_profit_loss)
+    """
+    df_win = df[df["profit"] > 0]
+    df_lose = df[df["profit"] < 0]
 
-    profit = df[df["profit"] > 0]["profit"].sum()
-    loss = df[df["profit"] < 0]["profit"].sum()
+    profit = df_win["profit"].sum()
+    loss = df_lose["profit"].sum()
     pf = - profit / loss
 
     count_list.append(len(df))
-    win_rate_list.append((len(buy_wins) + len(sell_wins)) / len(df) * 100)
-    return_avg_list.append(df["profit"].mean())
+    # win_rate_list.append((len(buy_wins) + len(sell_wins)) / len(df) * 100)
+    win_rate_list.append(len(df_win) / len(df) * 100)
+    # return_avg_list.append(df["profit"].mean())
     profit_list.append(profit)
     loss_list.append(loss)
     pf_list.append(pf)
@@ -137,11 +142,12 @@ df = pd.DataFrame({
     "期間": term_list,
     "総エントリ数": count_list,
     "勝率": win_rate_list,
-    "平均リターン": return_avg_list,
     "総利益": profit_list,
     "総損失": loss_list,
     "PF": pf_list,
     "最大ドローダウン": drawdown_list,
+})
+"""
     "買いエントリ数": buy_count_list,
     "買い勝率": buy_win_rate_list,
     "買い平均リターン": buy_return_avg_list,
@@ -154,18 +160,19 @@ df = pd.DataFrame({
     "売り利益": sell_profit_list,
     "売り損失": sell_loss_list,
     "売り損益": sell_profit_loss_list
-})
+    """
 
 # 列の順番を固定する
 df = df[["時間軸",
          "期間",
          "総エントリ数",
          "勝率",
-         "平均リターン",
          "総利益",
          "総損失",
          "PF",
          "最大ドローダウン",
+         ]]
+"""
          "買いエントリ数",
          "買い勝率",
          "買い平均リターン",
@@ -177,6 +184,7 @@ df = df[["時間軸",
          "売り平均リターン",
          "売り利益",
          "売り損失",
-         "売り損益"]]
+         "売り損益"
+"""
 
 df.to_csv(f'result-{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}.csv')

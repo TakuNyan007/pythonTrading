@@ -42,57 +42,67 @@ class Strategy(metaclass=ABCMeta):
             # TODO: term数だけとれているかチェック
             # len = self.term + 1(過去term期間 + 最新足)
             term_ohlc = ohlc_array[:, (idx - self.term):idx]
-            ohlc = term_ohlc[:, -1]
+            ohlc = ohlc_array[:, idx]
 
             if self.position != 0:
-                stop_loss = self.stop_loss_signal(term_ohlc)
+                stop_loss = self.stop_loss_signal(ohlc, term_ohlc)
                 if stop_loss:
-                    pass
-                # 利確シグナル、ドテンシグナル
-                signal, doten = self.close_signal(term_ohlc)
+                    self.update_result(ohlc, STOP_LOSS)
+                    idx += 1  # continueするのは微妙。
+                    continue
+                signal, doten = self.close_signal(ohlc, term_ohlc)
                 if signal:
-                    entry_price = self.entry_prices[-1]
-                    exit_price = ohlc[C]
-                    self.exit_time.append(datetime.fromtimestamp(
-                        ohlc[T]).strftime('%Y/%m/%d %H:%M'))
-                    self.exit_type.append(CLOSE_EXIT)
-                    self.exit_prices.append(exit_price)
-                    profit = self.position * (exit_price - entry_price)
-                    self.profit.append(profit)
-                    cost = (entry_price + exit_price) * TAKER_COST
-                    self.slippage.append(cost)
-                    self.position = 0
+                    self.update_result(ohlc, CLOSE_EXIT)
                     if doten != NO_ENTRY:
-                        self.entry_prices.append(exit_price)
+                        self.entry_prices.append(ohlc[C])
                         self.entry_sides.append(doten)
                         self.position = lot
             else:
-                side = self.entry_signal(term_ohlc)
+                side = self.entry_signal(ohlc, term_ohlc)
                 if side != NO_ENTRY:
                     self.entry_prices.append(ohlc[C])
                     self.entry_sides.append(side)
                     self.position = lot
 
             idx += 1
-            if idx > ohlc_array.shape[1]:
+            if idx >= ohlc_array.shape[1]:
                 # ポジションを持ったままの場合、最後のエントリーを除外する
                 if self.position > 0:
                     del self.entry_sides[-1]
                     del self.entry_prices[-1]
                 break
 
+    def update_result(self, ohlc, exit_type):
+        entry_price = self.entry_prices[-1]
+        entry_side = self.entry_sides[-1]
+        exit_price = ohlc[C]
+        self.exit_time.append(datetime.fromtimestamp(
+            ohlc[T]).strftime('%Y/%m/%d %H:%M'))
+        self.exit_type.append(exit_type)
+        self.exit_prices.append(exit_price)
+
+        profit = 0
+        if entry_side == BUY:
+            profit = self.position * (exit_price - entry_price)
+        elif entry_side == SELL:
+            profit = self.position * (entry_price - exit_price)
+        self.profit.append(profit)
+        cost = (entry_price + exit_price) * TAKER_COST
+        self.slippage.append(cost)
+        self.position = 0
+
     @abstractmethod
-    def close_signal(self, term_ohlc):
+    def close_signal(self, ohlc, term_ohlc):
         if self.position == 0:
             raise EnvironmentError()
         return False, NO_ENTRY  # closeSignal, dotenSignal
 
     @abstractmethod
-    def stop_loss_signal(self, term_ohlc):
+    def stop_loss_signal(self, ohlc, term_ohlc):
         return False
 
     @abstractmethod
-    def entry_signal(self, term_ohlc):
+    def entry_signal(self, ohlc, term_ohlc):
         return NO_ENTRY
 
     def result_df(self):
